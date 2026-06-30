@@ -1,0 +1,109 @@
+minikube status
+minikube stop
+& minikube -p minikube docker-env --shell powershell | Out-String | Invoke-Expression
+docker ps
+- all running containers
+# 1 — API Gateway
+cd "D:\projects\Microservice Zero trust\gateway"
+mvn spring-boot:build-image "-Dspring-boot.build-image.imageName=zerotrust/api-gateway:1.0.0"
+# 2 — Order Service
+cd "D:\projects\Microservice Zero trust\order"
+mvn spring-boot:build-image "-Dspring-boot.build-image.imageName=zerotrust/order-service:1.0.0"
+
+# 3 — Payment Service
+cd "D:\projects\Microservice Zero trust\payment"
+mvn spring-boot:build-image "-Dspring-boot.build-image.imageName=zerotrust/payment-service:1.0.0"
+
+# 4 — Inventory Service
+cd "D:\projects\Microservice Zero trust\inventory"
+mvn spring-boot:build-image "-Dspring-boot.build-image.imageName=zerotrust/inventory-service:1.0.0"
+
+# 5 — Rogue Service
+cd "D:\projects\Microservice Zero trust\rogue"
+mvn spring-boot:build-image "-Dspring-boot.build-image.imageName=zerotrust/rogue-service:1.0.0"
+
+docker images | Select-String "zerotrust"
+
+deploying to minikube
+cd "D:\projects\Microservice Zero trust\k8s"
+
+kubectl apply -f namespace.yaml
+kubectl apply -f inventory-service.yaml
+kubectl apply -f payment-service.yaml
+kubectl apply -f order-service.yaml
+kubectl apply -f api-gateway.yaml
+kubectl apply -f rogue-service.yaml
+
+to check logs of one pod
+kubectl logs -n zerotrust deployment/api-gateway
+
+verify all pods come up
+kubectl get pods -n zerotrust -w
+
+
+# API Gateway
+kubectl logs -n zerotrust -l app=api-gateway -c api-gateway -f
+# Order Service
+kubectl logs -n zerotrust -l app=order-service -c order-service -f
+# Payment Service
+kubectl logs -n zerotrust -l app=payment-service -c payment-service -f
+
+# Inventory Service
+kubectl logs -n zerotrust -l app=inventory-service -c inventory-service -f
+
+
+dummy url
+minikube service api-gateway -n zerotrust --url
+kubectl rollout restart deployment api-gateway -n zerotrust
+kubectl delete deployment -n zerotrust inventory-service payment-service order-service api-gateway rogue-service
+
+# Point to Minikube Docker
+& minikube -p minikube docker-env --shell powershell | Out-String | Invoke-Expression
+
+# 1 — API Gateway
+cd "D:\projects\Microservice Zero trust\gateway"
+mvn clean package -DskipTests -q
+docker build -t zerotrust/api-gateway:1.0.0 .
+
+# 2 — Order Service
+cd "D:\projects\Microservice Zero trust\order"
+
+mvn clean package -DskipTests -q
+docker build -t zerotrust/order-service:1.0.0 .
+
+# 3 — Payment Service
+cd "D:\projects\Microservice Zero trust\payment"
+mvn clean package -DskipTests -q
+docker build -t zerotrust/payment-service:1.0.0 .
+
+# 4 — Inventory Service
+cd "D:\projects\Microservice Zero trust\inventory"
+mvn clean package -DskipTests -q
+docker build -t zerotrust/inventory-service:1.0.0 .
+
+# 5 — Rogue Service
+cd "D:\projects\Microservice Zero trust\rogue"
+mvn clean package -DskipTests -q
+docker build -t zerotrust/rogue-service:1.0.0 .
+
+
+minikube service api-gateway -n zerotrust --url
+
+
+
+sudo tcpdump -i any -X port 8082 2>/dev/null
+kubectl patch svc payment-service `
+  -n zerotrust `
+  --type=merge `
+  -p '{\"spec\":{\"selector\":{\"app\":\"rogue-service\"}}}'
+
+  https://127.0.0.1:port/api/gateway/order
+
+  {
+      "customerId": "CUST-001",
+      "itemId": "ITEM-001",
+      "quantity": 2,
+      "cardNumber": "4111111111111111",
+      "cvv": "123",
+      "expiryDate": "12/27"
+  }

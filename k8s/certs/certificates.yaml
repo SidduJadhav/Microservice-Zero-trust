@@ -1,0 +1,77 @@
+# API Gateway certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: api-gateway-cert
+  namespace: zerotrust
+spec:
+  secretName: api-gateway-tls
+  commonName: api-gateway
+  dnsNames:
+    - api-gateway
+    - api-gateway.zerotrust.svc.cluster.local
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  issuerRef:
+    name: zerotrust-ca-issuer
+    kind: Issuer
+--- 
+# Order Service certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: order-service-cert
+  namespace: zerotrust
+spec:
+  secretName: order-service-tls
+  commonName: order-service
+  dnsNames:
+    - order-service
+    - order-service.zerotrust.svc.cluster.local
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  issuerRef:
+    name: zerotrust-ca-issuer
+    kind: Issuer
+---
+# Payment Service certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: payment-service-cert
+  namespace: zerotrust
+spec:
+  secretName: payment-service-tls
+  commonName: payment-service
+  dnsNames:
+    - payment-service
+    - payment-service.zerotrust.svc.cluster.local
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  issuerRef:
+    name: zerotrust-ca-issuer
+    kind: Issuer
+---
+# Inventory Service certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: inventory-service-cert
+  namespace: zerotrust
+spec:
+  secretName: inventory-service-tls
+  commonName: inventory-service
+  dnsNames:
+    - inventory-service
+    - inventory-service.zerotrust.svc.cluster.local
+  privateKey:
+    algorithm: RSA
+    size: 2048
+  issuerRef:
+    name: zerotrust-ca-issuer
+    kind: Issuer
+# NOTE: Rogue service gets NO certificate — this is intentional
+# It cannot present a valid cert → SSLHandshakeException → blocked

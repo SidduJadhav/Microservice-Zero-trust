@@ -15,7 +15,7 @@ spec:
     spec:
       initContainers:
         - name: create-keystore
-          image: eclipse-temurin:21-jre
+          image: eclipse-temurin:25-jre
           command:
             - sh
             - -c
